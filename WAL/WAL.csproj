@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{611868C2-2AAE-445E-87F4-38890169BD36}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>WAL</RootNamespace>
+    <AssemblyName>WAL</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Models\AddonFileDependencyModel.cs" />
+    <Compile Include="Models\AddonFileModuleModel.cs" />
+    <Compile Include="Models\CategorySectionModel.cs" />
+    <Compile Include="Models\FingerprintMatchModel.cs" />
+    <Compile Include="Models\FingerprintMatchResultModel.cs" />
+    <Compile Include="Models\GameDetectionHintModel.cs" />
+    <Compile Include="Models\GameFileModel.cs" />
+    <Compile Include="Models\GameFileParsingRuleModel.cs" />
+    <Compile Include="Models\SortableGameVersionModel.cs" />
+    <Compile Include="Static\Const\TwitchConstants.cs" />
+    <Compile Include="Static\Enums\GameDetectionHintOption.cs" />
+    <Compile Include="Static\Enums\GameDetectionHintType.cs" />
+    <Compile Include="Static\Enums\GameFileType.cs" />
+    <Compile Include="Static\Enums\GamePlatformType.cs" />
+    <Compile Include="Static\Enums\GameSectionPackageMapPackageType.cs" />
+    <Compile Include="Static\Enums\ProjectFileFingerprintType.cs" />
+    <Compile Include="Static\Enums\ProjectFileRelationType.cs" />
+    <Compile Include="Static\Enums\ProjectFileReleaseType.cs" />
+    <Compile Include="Static\Enums\ProjectFileStatus.cs" />
+    <Compile Include="Static\Enums\ProjectRestrictProjectFileAccess.cs" />
+    <Compile Include="Static\Enums\ProjectStatus.cs" />
+    <Compile Include="Static\Enums\SupportedClientConfiguration.cs" />
+    <Compile Include="Static\Enums\WoWVersion.cs" />
+    <Compile Include="Helpers\IOHelper.cs" />
+    <Compile Include="Helpers\MurmurHash2Helper.cs" />
+    <Compile Include="Models\AttachmentModel.cs" />
+    <Compile Include="Models\AuthorModel.cs" />
+    <Compile Include="Models\CategoryModel.cs" />
+    <Compile Include="Models\AddonFileModel.cs" />
+    <Compile Include="Models\GameModel.cs" />
+    <Compile Include="Models\GameVersionFileModel.cs" />
+    <Compile Include="Models\SearchRequestModel.cs" />
+    <Compile Include="Models\SearchResponceModel.cs" />
+    <Compile Include="Service\TwitchApiService.cs" />
+    <Compile Include="UI\AddonsList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\AddonsList.Designer.cs">
+      <DependentUpon>AddonsList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\AppLoding.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\AppLoding.Designer.cs">
+      <DependentUpon>AppLoding.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Main.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Main.Designer.cs">
+      <DependentUpon>Main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\AppSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\AppSettings.Designer.cs">
+      <DependentUpon>AppSettings.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="UI\AddonsList.resx">
+      <DependentUpon>AddonsList.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\AppLoding.resx">
+      <DependentUpon>AppLoding.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\Main.resx">
+      <DependentUpon>Main.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\AppSettings.resx">
+      <DependentUpon>AppSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="icons\loading-14" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="icons\480px-WoW_icon.svg.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="icons\48px-WoW_icon.svg.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="icons\settings %281%29.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="icons\wait_me.gif" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

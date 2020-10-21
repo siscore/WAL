@@ -1,0 +1,15 @@
+D:\Sources\Bitbucket\WAL\WAL\bin\Debug\WAL.exe.config
+D:\Sources\Bitbucket\WAL\WAL\bin\Debug\WAL.exe
+D:\Sources\Bitbucket\WAL\WAL\bin\Debug\WAL.pdb
+D:\Sources\Bitbucket\WAL\WAL\bin\Debug\Newtonsoft.Json.dll
+D:\Sources\Bitbucket\WAL\WAL\bin\Debug\Newtonsoft.Json.xml
+D:\Sources\Bitbucket\WAL\WAL\obj\Debug\WAL.Properties.Resources.resources
+D:\Sources\Bitbucket\WAL\WAL\obj\Debug\WAL.UI.AddonsList.resources
+D:\Sources\Bitbucket\WAL\WAL\obj\Debug\WAL.UI.AppLoding.resources
+D:\Sources\Bitbucket\WAL\WAL\obj\Debug\WAL.UI.Main.resources
+D:\Sources\Bitbucket\WAL\WAL\obj\Debug\WAL.UI.AppSettings.resources
+D:\Sources\Bitbucket\WAL\WAL\obj\Debug\WAL.csproj.GenerateResource.cache
+D:\Sources\Bitbucket\WAL\WAL\obj\Debug\WAL.csproj.CoreCompileInputs.cache
+D:\Sources\Bitbucket\WAL\WAL\obj\Debug\WAL.csproj.CopyComplete
+D:\Sources\Bitbucket\WAL\WAL\obj\Debug\WAL.exe
+D:\Sources\Bitbucket\WAL\WAL\obj\Debug\WAL.pdb
