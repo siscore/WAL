@@ -25,17 +25,18 @@ namespace WAL.UI.Controls
             public Control Control { get; set; }
         }
 
-        private List<HeaderOptionsModel> _headerOptions;
-        public List<GridRowItem> _rowItems { get; set; }
+        private readonly List<HeaderOptionsModel> HeaderOptions;
+
+        private List<GridRowItem> RowItems { get; set; }
 
         public GridContainer()
         {
             InitializeComponent();
 
-            _rowItems = new List<GridRowItem>();
-            _headerOptions = new List<HeaderOptionsModel>
+            RowItems = new List<GridRowItem>();
+            HeaderOptions = new List<HeaderOptionsModel>
             {
-                new HeaderOptionsModel{ Id = 0, Name = "", Height = 50, WidthPesantage = 50, IfFixedWidth = true },
+                new HeaderOptionsModel{ Id = 0, Name = "", Height = 50, WidthPesantage = 65, IfFixedWidth = true },
                 new HeaderOptionsModel{ Id = 1, Name = "Addon", Height = 50, WidthPesantage = 27 },
                 new HeaderOptionsModel{ Id = 2, Name = "Status", Height = 50, WidthPesantage = 15 },
                 new HeaderOptionsModel{ Id = 3, Name = "Last Version", Height = 50, WidthPesantage = 25 },
@@ -45,7 +46,7 @@ namespace WAL.UI.Controls
 
             var prevHeader = (Control)null;
 
-            foreach (var header in _headerOptions)
+            foreach (var header in HeaderOptions)
             {
                 var parent = this.HeaderPanel;
                 var name = $"panel{header.Id}";
@@ -86,7 +87,7 @@ namespace WAL.UI.Controls
         {
             var prevHeader = (Control)null;
 
-            foreach (var header in _headerOptions)
+            foreach (var header in HeaderOptions)
             {
                 if (header.Control == null)
                     break;
@@ -103,7 +104,7 @@ namespace WAL.UI.Controls
 
         private void RowPanelResize(object sender, EventArgs e)
         {
-            foreach (var item in _rowItems)
+            foreach (var item in RowItems)
             {
                 item.ResizeRow(HeaderPanel, e);
             }
@@ -120,23 +121,23 @@ namespace WAL.UI.Controls
         public GridRowItem Add(RowItemsModel item)
         {
             var name = $"row{item.Id}";
-            this.RowPanel.Controls.Add(new GridRowItem(item.Id, _headerOptions) { Name = name });
+            this.RowPanel.Controls.Add(new GridRowItem(item.Id, HeaderOptions) { Name = name });
             var rowItem = this.RowPanel.Controls.Find(name, false).Where(x => x.Name.Equals(name)).First();
 
             rowItem.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
-            rowItem.Top = (_rowItems.Count) * _headerOptions.First().Height;
+            rowItem.Top = (RowItems.Count) * HeaderOptions.First().Height;
             rowItem.Left = 0;
-            rowItem.Size = new Size(this.RowPanel.Width, _headerOptions.First().Height);
+            rowItem.Size = new Size(this.RowPanel.Width, HeaderOptions.First().Height);
             rowItem.Font = RowPanel.Font;
 
             ((GridRowItem)rowItem).ResizeRow(this.HeaderPanel, null);
 
-            _rowItems.Add(((GridRowItem)rowItem));
+            RowItems.Add(((GridRowItem)rowItem));
             ((GridRowItem)rowItem).ShowInfo(item.RowItems);
 
             ((GridRowItem)rowItem).NotifyParentEvent += new NotifyParentEventHandler(GridRow_MouseClick);
 
-            return _rowItems.Last();
+            return RowItems.Last();
         }
 
         public IEnumerable<GridRowItem> AddRange(IEnumerable<RowItemsModel> items)
@@ -153,14 +154,8 @@ namespace WAL.UI.Controls
 
         public void Clear()
         {
-            foreach(var item in _rowItems)
-            {
-                RowPanel.Controls.Clear();
-            }
-
-            _rowItems.Clear();
+            RowPanel.Controls.Clear();
+            RowItems.Clear();
         }
-
-        
     }
 }

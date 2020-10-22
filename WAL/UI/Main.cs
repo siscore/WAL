@@ -54,12 +54,12 @@ namespace WAL.UI
             childForm.Show();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void SettingButton_Click(object sender, EventArgs e)
         {
             OpenChildForm(new UI.AppSettings());
         }
 
-        private void btnWoWRetail_Click(object sender, EventArgs e)
+        private void ShowWoWRetailButton_Click(object sender, EventArgs e)
         {
             OpenChildForm(new UI.AddonsList(TwitchConstants.WoWRetail));
         }

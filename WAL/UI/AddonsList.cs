@@ -21,17 +21,17 @@ namespace WAL.UI
 {
     public partial class AddonsList : Form
     {
-        private FingerprintMatchResultModel _addons{ get; set; }
-        private List<CategoryAvatar> _categoryAvatars { get; set; }
-        private readonly string _pageType;
+        private FingerprintMatchResultModel Addons{ get; set; }
+        private List<CategoryAvatar> CategoryAvatars { get; set; }
+        private readonly string PageType;
 
         public AddonsList(string pageType)
         {
             InitializeComponent();
 
-            _pageType = pageType;
-            _addons = null;
-            _categoryAvatars = new List<CategoryAvatar>();
+            PageType = pageType;
+            Addons = null;
+            CategoryAvatars = new List<CategoryAvatar>();
 
             SearchAddons();
         }
@@ -80,19 +80,19 @@ namespace WAL.UI
                 fingerprints.Add(fingerprint.ToString());
             }
 
-            _addons = await new TwitchApiService().GetAddonsByFingerprint(fingerprints);
+            Addons = await new TwitchApiService().GetAddonsByFingerprint(fingerprints);
 
             //AddonsListGrid.Rows.Clear();
 
-            if (_addons != null && _addons.ExactMatches.Count != 0)
+            if (Addons != null && Addons.ExactMatches.Count != 0)
             {
-                var addonsServerInfo = await new TwitchApiService().GetAddonsInfo(_addons.ExactMatches.Select(x => x.Id.ToString()).ToList());
+                var addonsServerInfo = await new TwitchApiService().GetAddonsInfo(Addons.ExactMatches.Select(x => x.Id.ToString()).ToList());
 
                 await LoadCategoryAvatars(addonsServerInfo.Select(x => x.Categories.First()).ToList());
 
                 gridContainer1.Clear();
 
-                var rows = _addons.ExactMatches.Select((x, index) => new RowItemsModel
+                var rows = Addons.ExactMatches.Select((x, index) => new RowItemsModel
                 {
                     Id = index,
                     RowItems = new List<RowItemModel>
@@ -100,7 +100,7 @@ namespace WAL.UI
                         new RowItemModel
                         {
                             Name = addonsServerInfo.Where(m => m.Id == x.Id).First().Categories.First().AvatarUrl,
-                            Bitmap = _categoryAvatars.Where(a => a.Id == addonsServerInfo.Where(m => m.Id == x.Id).First().Categories.First().AvatarId).First().Bitmap,
+                            Bitmap = CategoryAvatars.Where(a => a.Id == addonsServerInfo.Where(m => m.Id == x.Id).First().Categories.First().AvatarId).First().Bitmap,
                             PanelType = PanelTypes.Image,
                         },
                         new RowItemModel
@@ -119,7 +119,7 @@ namespace WAL.UI
                         {
                             Name = addonsServerInfo.Where(m => m.Id == x.Id).First().LatestFiles
                                         .Where(l => l.ReleaseType == ProjectFileReleaseType.Release)
-                                        .Where(l => l.GameVersionFlavor.Equals(TwitchConstants.WoWRetail))
+                                        .Where(l => l.GameVersionFlavor.Equals(PageType))
                                         .OrderBy(o => o.FileDate)
                                         .Last().FileName
                         },
@@ -127,7 +127,7 @@ namespace WAL.UI
                         {
                             Name = addonsServerInfo.Where(m => m.Id == x.Id).First().LatestFiles
                                         .Where(l => l.ReleaseType == ProjectFileReleaseType.Release)
-                                        .Where(l => l.GameVersionFlavor.Equals(TwitchConstants.WoWRetail))
+                                        .Where(l => l.GameVersionFlavor.Equals(PageType))
                                         .OrderBy(o => o.FileDate)
                                         .Last().GameVersion.FirstOrDefault() ?? string.Empty,
                             ContentAlignment = ContentAlignment.MiddleCenter
@@ -191,17 +191,17 @@ namespace WAL.UI
         {
             foreach (var item in categoryModels)
             {
-                if (!_categoryAvatars.Any(x => x.Id == item.AvatarId))
+                if (!CategoryAvatars.Any(x => x.Id == item.AvatarId))
                 {
                     var bitmap = await new TwitchApiService().GetCategoryBitmap(new Uri(item.AvatarUrl));
-                    _categoryAvatars.Add(new CategoryAvatar { Id = item.AvatarId, Url = item.AvatarUrl, Bitmap = bitmap });
+                    CategoryAvatars.Add(new CategoryAvatar { Id = item.AvatarId, Url = item.AvatarUrl, Bitmap = bitmap });
                 }
             }
 
             return true;
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void RefreshAddondButton_Click(object sender, EventArgs e)
         {
             SearchAddons();
         }
