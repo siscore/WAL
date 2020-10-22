@@ -13,12 +13,16 @@ using WAL.Helpers;
 using WAL.Models;
 using WAL.Service;
 using System.Text.RegularExpressions;
+using WAL.UI.Controls.Models;
+using WAL.UI.Controls.Static.Enums;
+using WAL.Static.Const;
 
 namespace WAL.UI
 {
     public partial class AddonsList : Form
     {
         private FingerprintMatchResultModel _addons{ get; set; }
+        private List<CategoryAvatar> _categoryAvatars { get; set; }
         private readonly string _pageType;
 
         public AddonsList(string pageType)
@@ -27,39 +31,35 @@ namespace WAL.UI
 
             _pageType = pageType;
             _addons = null;
+            _categoryAvatars = new List<CategoryAvatar>();
 
             SearchAddons();
-
-            //Debug Grid
-            //AddonsListGrid.Rows.Add(new string[] { "123", "addon1", "Update", "Verson", "1000", "Auther" });
-            //AddonsListGrid.Rows.Add(new string[] { "123", "addon2", "Update", "", "" });
-            //AddonsListGrid.Rows.Add(new string[] { "123", "addon3", "Update", "", "" });
-            //AddonsListGrid.Rows.Add(new string[] { "123", "addon4", "Update", "", "" });
-            //AddonsListGrid.Rows.Add(new string[] { "123", "addon5", "Update", "", "" });
-            //AddonsListGrid.Rows.Add(new string[] { "123", "addon6", "Update", "", "" });
-            //AddonsListGrid.Rows.Add(new string[] { "123", "addon7", "Update", "", "" });
-
-            //panelWait.Hide();
         }
 
         private async void SearchAddons()
         {
             var fingerprints = new List<string>();
             var searchFolders = IOHelper.GetAddonsDirectories(WoWVersion.Retail);
+            var game = Program._game;
 
             foreach (var addonFolder in searchFolders)
             {
                 var matchingFiles = new List<string>();
 
                 var fileInfoList = addonFolder.GetFileSystemInfos()
-                    .Where(x => x.Extension.Equals(".toc", StringComparison.CurrentCultureIgnoreCase) ||
-                                x.Extension.Equals(".xml;", StringComparison.CurrentCultureIgnoreCase))
+                    .Where(x => x.Extension.Equals(".toc"))
                     .Select(x => x.FullName).ToList();
+
+                matchingFiles.AddRange(addonFolder.GetFileSystemInfos()
+                    .Where(x => x.Extension.Equals(".xml") && x.Name.ToLowerInvariant().Contains("bindings."))
+                    .Select(x => x.FullName).ToList());
 
                 foreach (string path in fileInfoList)
                 {
-                    ProcessIncludeFile(matchingFiles, new FileInfo(path), Program._game);
+                    ProcessIncludeFile(matchingFiles, new FileInfo(path), game);
                 }
+
+                matchingFiles.Sort();
 
                 var longList = new List<long>();
                 foreach (string path in matchingFiles)
@@ -82,22 +82,64 @@ namespace WAL.UI
 
             _addons = await new TwitchApiService().GetAddonsByFingerprint(fingerprints);
 
-            AddonsListGrid.Rows.Clear();
+            //AddonsListGrid.Rows.Clear();
 
             if (_addons != null && _addons.ExactMatches.Count != 0)
             {
-                var addonsServerInfo = new List<SearchResponceModel>();
-                var tasks = _addons.ExactMatches.Select(async x => addonsServerInfo.Add(await new TwitchApiService().GetAddonInfo(x.Id)));
-                await Task.WhenAll(tasks);
+                var addonsServerInfo = await new TwitchApiService().GetAddonsInfo(_addons.ExactMatches.Select(x => x.Id.ToString()).ToList());
 
-                //var gg = _addons.ExactMatches
-                //    .Select(x => new DataGridViewRow().
-                //    {
-                //        x.Id.ToString(),
-                //        string.Format("{0}{1}{2}", addonsServerInfo.Where(a => a.Id == x.Id).First().Name, Environment.NewLine, x.File.FileName)
-                //    });
+                await LoadCategoryAvatars(addonsServerInfo.Select(x => x.Categories.First()).ToList());
 
-                //AddonsListGrid.Rows.AddRange(gg);
+                gridContainer1.Clear();
+
+                var rows = _addons.ExactMatches.Select((x, index) => new RowItemsModel
+                {
+                    Id = index,
+                    RowItems = new List<RowItemModel>
+                    {
+                        new RowItemModel
+                        {
+                            Name = addonsServerInfo.Where(m => m.Id == x.Id).First().Categories.First().AvatarUrl,
+                            Bitmap = _categoryAvatars.Where(a => a.Id == addonsServerInfo.Where(m => m.Id == x.Id).First().Categories.First().AvatarId).First().Bitmap,
+                            PanelType = PanelTypes.Image,
+                        },
+                        new RowItemModel
+                        {
+                            Name = addonsServerInfo.Where(m => m.Id == x.Id).First().Name +
+                                   Environment.NewLine +
+                                   x.File.FileName,
+                            ContentAlignment = ContentAlignment.TopLeft
+                        },
+                        new RowItemModel
+                        {
+                            Name = "Unknown",
+                            ContentAlignment=ContentAlignment.MiddleCenter
+                        },
+                        new RowItemModel
+                        {
+                            Name = addonsServerInfo.Where(m => m.Id == x.Id).First().LatestFiles
+                                        .Where(l => l.ReleaseType == ProjectFileReleaseType.Release)
+                                        .Where(l => l.GameVersionFlavor.Equals(TwitchConstants.WoWRetail))
+                                        .OrderBy(o => o.FileDate)
+                                        .Last().FileName
+                        },
+                        new RowItemModel
+                        {
+                            Name = addonsServerInfo.Where(m => m.Id == x.Id).First().LatestFiles
+                                        .Where(l => l.ReleaseType == ProjectFileReleaseType.Release)
+                                        .Where(l => l.GameVersionFlavor.Equals(TwitchConstants.WoWRetail))
+                                        .OrderBy(o => o.FileDate)
+                                        .Last().SortableGameVersion.OrderBy(o => o.GameVersionReleaseDate).First().GameVersion,
+                            ContentAlignment = ContentAlignment.MiddleCenter
+                        },
+                        new RowItemModel
+                        {
+                            Name = addonsServerInfo.Where(m => m.Id == x.Id).First().Authors.First().Name,
+                            ContentAlignment = ContentAlignment.MiddleCenter
+                        }
+                    }
+                }).ToList();
+                gridContainer1.AddRange(rows);
             }
         }
 
@@ -143,6 +185,20 @@ namespace WAL.UI
                 ProcessIncludeFile(matchingFileList, new FileInfo(fileName), game);
             }
 
+        }
+
+        private async Task<bool> LoadCategoryAvatars(IEnumerable<CategoryModel> categoryModels)
+        {
+            foreach (var item in categoryModels)
+            {
+                if (!_categoryAvatars.Any(x => x.Id == item.AvatarId))
+                {
+                    var bitmap = await new TwitchApiService().GetCategoryBitmap(new Uri(item.AvatarUrl));
+                    _categoryAvatars.Add(new CategoryAvatar { Id = item.AvatarId, Url = item.AvatarUrl, Bitmap = bitmap });
+                }
+            }
+
+            return true;
         }
 
         private void button1_Click(object sender, EventArgs e)

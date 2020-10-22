@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WAL.Static.Enums;
 
 namespace WAL.Models
 {
     public class GameVersionFileModel
     {
-        public int FileType { get; set; }
+        public ProjectFileReleaseType FileType { get; set; }
 
         public string GameVersion { get; set; }
 

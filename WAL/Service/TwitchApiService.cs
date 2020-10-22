@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -93,6 +95,54 @@ namespace WAL.Service
                     {
                         var result = JsonConvert.DeserializeObject<SearchResponceModel>(responseData);
                         return result;
+                    }
+
+                    return null;
+                }
+            }
+        }
+
+        public async Task<List<SearchResponceModel>> GetAddonsInfo(List<string>  addonIds)
+        {
+            using (var httpClient = new HttpClient { BaseAddress = _baseAddress })
+            {
+                using (var content = new StringContent($@"[{ string.Join(",", addonIds) }]", System.Text.Encoding.Default, "application/json"))
+                {
+                    content.Headers.ContentType.CharSet = string.Empty;
+                    using (var response = await httpClient.PostAsync("/api/v2/addon", content))
+                    {
+                        string responseHeaders = response.Headers.ToString();
+                        string responseData = await response.Content.ReadAsStringAsync();
+
+                        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                        {
+                            var result = JsonConvert.DeserializeObject<List<SearchResponceModel>>(responseData);
+                            return result;
+                        }
+
+                        return null;
+                    }
+                }
+            }
+        }
+
+        public async Task<Bitmap> GetCategoryBitmap(Uri uri)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.GetAsync(uri))
+                {
+                    if (response != null && response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        using (var stream = await response.Content.ReadAsStreamAsync())
+                        {
+                            using (var memStream = new MemoryStream())
+                            {
+                                await stream.CopyToAsync(memStream);
+                                memStream.Position = 0;
+                                return new Bitmap(memStream);
+                            }
+                        }
                     }
 
                     return null;

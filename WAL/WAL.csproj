@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Models\AddonFileDependencyModel.cs" />
     <Compile Include="Models\AddonFileModuleModel.cs" />
+    <Compile Include="Models\CategoryAvatar.cs" />
     <Compile Include="Models\CategorySectionModel.cs" />
     <Compile Include="Models\FingerprintMatchModel.cs" />
     <Compile Include="Models\FingerprintMatchResultModel.cs" />
@@ -95,6 +96,21 @@
     <Compile Include="UI\AppLoding.Designer.cs">
       <DependentUpon>AppLoding.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\Controls\GridContainer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\Controls\GridContainer.Designer.cs">
+      <DependentUpon>GridContainer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Controls\GridRowItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\Controls\GridRowItem.Designer.cs">
+      <DependentUpon>GridRowItem.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Controls\Models\RowItemModel.cs" />
+    <Compile Include="UI\Controls\Models\RowItemsModel.cs" />
+    <Compile Include="UI\Controls\Static\Enums\PanelTypes.cs" />
     <Compile Include="UI\Main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -124,6 +140,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\AppLoding.resx">
       <DependentUpon>AppLoding.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\Controls\GridContainer.resx">
+      <DependentUpon>GridContainer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\Controls\GridRowItem.resx">
+      <DependentUpon>GridRowItem.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
