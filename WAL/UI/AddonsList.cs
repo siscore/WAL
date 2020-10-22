@@ -129,7 +129,7 @@ namespace WAL.UI
                                         .Where(l => l.ReleaseType == ProjectFileReleaseType.Release)
                                         .Where(l => l.GameVersionFlavor.Equals(TwitchConstants.WoWRetail))
                                         .OrderBy(o => o.FileDate)
-                                        .Last().SortableGameVersion.OrderBy(o => o.GameVersionReleaseDate).First().GameVersion,
+                                        .Last().GameVersion.FirstOrDefault() ?? string.Empty,
                             ContentAlignment = ContentAlignment.MiddleCenter
                         },
                         new RowItemModel
