@@ -67,7 +67,7 @@
             this.button1.Size = new System.Drawing.Size(75, 75);
             this.button1.TabIndex = 1;
             this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.button1.Click += new System.EventHandler(this.SettingButton_Click);
             // 
             // btnWoWRetail
             // 
@@ -79,7 +79,7 @@
             this.btnWoWRetail.Size = new System.Drawing.Size(75, 75);
             this.btnWoWRetail.TabIndex = 0;
             this.btnWoWRetail.UseVisualStyleBackColor = true;
-            this.btnWoWRetail.Click += new System.EventHandler(this.btnWoWRetail_Click);
+            this.btnWoWRetail.Click += new System.EventHandler(this.ShowWoWRetailButton_Click);
             // 
             // Main
             // 

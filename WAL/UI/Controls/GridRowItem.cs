@@ -10,16 +10,22 @@ using System.Windows.Forms;
 using WAL.UI.Controls.Models;
 using WAL.UI.Controls.Static.Enums;
 using static WAL.UI.Controls.GridContainer;
+using System.Diagnostics;
 
 namespace WAL.UI.Controls
 {
     public partial class GridRowItem : UserControl
     {
         public event NotifyParentEventHandler NotifyParentEvent;
-
-        private IEnumerable<HeaderOptionsModel> _headers;
-        private int _Id;
         public bool Selected { get; set; }
+
+        private readonly IEnumerable<HeaderOptionsModel> Headers;
+        private readonly int Id;
+
+        public GridRowItem()
+        {
+            InitializeComponent();
+        }
 
         public GridRowItem(int Index, IEnumerable<HeaderOptionsModel> headers)
         {
@@ -27,8 +33,8 @@ namespace WAL.UI.Controls
 
             this.MouseClick += new MouseEventHandler(MainClick);
 
-            _Id = Index;
-            _headers = headers;
+            Id = Index;
+            Headers = headers;
 
             var index = 0;
 
@@ -38,7 +44,7 @@ namespace WAL.UI.Controls
             var _g = r.Next(0, 255);
 
             var prevPanel = (Control)null;
-            foreach (var column in _headers)
+            foreach (var column in Headers)
             {
                 var name = $"col{index}";
                 this.Controls.Add(new Panel
@@ -47,6 +53,7 @@ namespace WAL.UI.Controls
                     Size = new Size(150, 50),
                     BackColor = Color.FromArgb(24, 24, 27),
                     Top = 0,
+                    Height = Headers.First().Height,
                     Visible = true
                 });
                 var panel = this.Controls.Find(name, false).Where(x => x.Name.Equals(name)).First();
@@ -63,13 +70,24 @@ namespace WAL.UI.Controls
             var panel = (Control)null;
 
             foreach (var item in items)
-            {       
+            {
+                name = $"col{index}";
+                panel = this.Controls.Find(name, false).Where(x => x.Name.Equals(name)).FirstOrDefault();
+
+                if (panel.Controls.Count != 0)
+                {
+                    foreach(Control control in panel.Controls)
+                    {
+                        control.Dispose();
+                    }
+                }
+
+                if (panel == null)
+                    continue;
+
                 switch (item.PanelType)
                 {
                     case PanelTypes.Text:
-                        name = $"col{index}";
-                        panel = this.Controls.Find(name, false).Where(x => x.Name.Equals(name)).First();
-
                         panel.Controls.Add(new Label
                         {
                             Name = name,
@@ -82,27 +100,27 @@ namespace WAL.UI.Controls
                             Padding = new Padding(15,3,15,3)
                         });
 
-                        panel.Controls[0].MouseClick += new MouseEventHandler(RowMouseClick);
                         break;
                     case PanelTypes.Image:
-                        name = $"col{index}";
-                        panel = this.Controls.Find(name, false).Where(x => x.Name.Equals(name)).First();
-
                         panel.Controls.Add(new PictureBox
                         {
                             Name = name,
                             BorderStyle = BorderStyle.None,
+                            Dock = DockStyle.Fill,
+                            Padding = new Padding(7),
                             WaitOnLoad = false,
                             SizeMode = PictureBoxSizeMode.StretchImage,
                             Image = item.Bitmap,
-                            Size = new Size(panel.Height, panel.Height),
-                            Visible = true,
-                            Padding = new Padding(7)
+                            Visible = true
                         });
+
                         break;
                     default:
                         break;
                 }
+
+                panel.Controls[0].MouseClick += new MouseEventHandler(RowMouseClick);
+
                 index++;
             }
         }
@@ -115,12 +133,12 @@ namespace WAL.UI.Controls
         private void MainClick(object sender, MouseEventArgs e)
         {
             this.Selected = !this.Selected;
-            NotifyParentEvent?.Invoke(this._Id);
+            NotifyParentEvent?.Invoke(this.Id);
         }
 
         public void OnSelected(int RowId)
         {
-            if (_Id != RowId)
+            if (Id != RowId)
                 Selected = false;
             foreach(Control item in Controls)
             {
@@ -133,10 +151,13 @@ namespace WAL.UI.Controls
             var prevPanel = (Control)null;
             var index = 0;
 
-            foreach (var col in _headers)
+            foreach (var col in Headers)
             {
                 var name = $"col{index}";
-                var panel = this.Controls.Find(name, false).Where(x => x.Name.Equals(name)).First();
+                var panel = this.Controls.Find(name, false).Where(x => x.Name.Equals(name)).FirstOrDefault();
+
+                if (panel == null)
+                    return;
 
                 if (!InvokeRequired)
                 {
@@ -144,6 +165,9 @@ namespace WAL.UI.Controls
                     panel.Width = col.IfFixedWidth
                         ? col.WidthPesantage
                         : (((Control)sender).Width * col.WidthPesantage) / 100;
+                    panel.Height = col.Height;
+                    Debug.WriteLine($"Row Top: {panel.Top} Height: {panel.Height}");
+
                 }
                 else
                 {
@@ -151,8 +175,10 @@ namespace WAL.UI.Controls
                     {
                         panel.Left = prevPanel == null ? 0 : prevPanel.Left + prevPanel.Width;
                         panel.Width = col.IfFixedWidth
-                        ? col.WidthPesantage
-                        : (((Control)sender).Width * col.WidthPesantage) / 100;
+                            ? col.WidthPesantage
+                            : (((Control)sender).Width * col.WidthPesantage) / 100;
+                        panel.Height = col.Height;
+                        Debug.WriteLine($"Row Top: {panel.Top} Height: {panel.Height}");
                     }));
                 }
 

@@ -59,6 +59,7 @@
     <Compile Include="Models\GameFileModel.cs" />
     <Compile Include="Models\GameFileParsingRuleModel.cs" />
     <Compile Include="Models\SortableGameVersionModel.cs" />
+    <Compile Include="Service\AddonsService.cs" />
     <Compile Include="Static\Const\TwitchConstants.cs" />
     <Compile Include="Static\Enums\GameDetectionHintOption.cs" />
     <Compile Include="Static\Enums\GameDetectionHintType.cs" />
@@ -108,6 +109,9 @@
     <Compile Include="UI\Controls\GridRowItem.Designer.cs">
       <DependentUpon>GridRowItem.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\Controls\Helpers\SuspendDrawingUpdate.cs" />
+    <Compile Include="UI\Controls\Models\GridRowItemModel.cs" />
+    <Compile Include="UI\Controls\Models\HeaderOptionsModel.cs" />
     <Compile Include="UI\Controls\Models\RowItemModel.cs" />
     <Compile Include="UI\Controls\Models\RowItemsModel.cs" />
     <Compile Include="UI\Controls\Static\Enums\PanelTypes.cs" />

@@ -9,6 +9,7 @@ namespace WAL.UI.Controls.Models
     public class RowItemsModel
     {
         public int Id { get; set; }
-        public IEnumerable<RowItemModel> RowItems { get; set; }
+        public List<RowItemModel> RowItems { get; set; }
+        public bool PriorityOrder { get; set; }
     }
 }
