@@ -36,12 +36,12 @@ namespace WAL.UI.Controls
             RowItems = new List<GridRowItem>();
             HeaderOptions = new List<HeaderOptionsModel>
             {
-                new HeaderOptionsModel{ Id = 0, Name = "", Height = 50, WidthPesantage = 65, IfFixedWidth = true },
-                new HeaderOptionsModel{ Id = 1, Name = "Addon", Height = 50, WidthPesantage = 27 },
-                new HeaderOptionsModel{ Id = 2, Name = "Status", Height = 50, WidthPesantage = 15 },
-                new HeaderOptionsModel{ Id = 3, Name = "Last Version", Height = 50, WidthPesantage = 25 },
-                new HeaderOptionsModel{ Id = 4, Name = "Game Version", Height = 50, WidthPesantage = 15 },
-                new HeaderOptionsModel{ Id = 5, Name = "Author", Height = 50, WidthPesantage = 16 }
+                new HeaderOptionsModel{ Id = 0, Name = "", Height = 50, WidthPesantage = 50, IfFixedWidth = true }
+                //new HeaderOptionsModel{ Id = 1, Name = "Addon", Height = 50, WidthPesantage = 27 },
+                //new HeaderOptionsModel{ Id = 2, Name = "Status", Height = 50, WidthPesantage = 15 },
+                //new HeaderOptionsModel{ Id = 3, Name = "Last Version", Height = 50, WidthPesantage = 25 },
+                //new HeaderOptionsModel{ Id = 4, Name = "Game Version", Height = 50, WidthPesantage = 15 },
+                //new HeaderOptionsModel{ Id = 5, Name = "Author", Height = 50, WidthPesantage = 16 }
             };
 
             var prevHeader = (Control)null;
@@ -124,13 +124,14 @@ namespace WAL.UI.Controls
             this.RowPanel.Controls.Add(new GridRowItem(item.Id, HeaderOptions) { Name = name });
             var rowItem = this.RowPanel.Controls.Find(name, false).Where(x => x.Name.Equals(name)).First();
 
-            rowItem.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
-            rowItem.Top = (RowItems.Count) * HeaderOptions.First().Height;
-            rowItem.Left = 0;
-            rowItem.Size = new Size(this.RowPanel.Width, HeaderOptions.First().Height);
+            //rowItem.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+            rowItem.Dock = DockStyle.Top;
+            //rowItem.Top = (RowItems.Count) * HeaderOptions.First().Height;
+            //rowItem.Left = 0;
+            //rowItem.Size = new Size(this.RowPanel.Width, HeaderOptions.First().Height);
             rowItem.Font = RowPanel.Font;
 
-            ((GridRowItem)rowItem).ResizeRow(this.HeaderPanel, null);
+            //((GridRowItem)rowItem).ResizeRow(this.HeaderPanel, null);
 
             RowItems.Add(((GridRowItem)rowItem));
             ((GridRowItem)rowItem).ShowInfo(item.RowItems);

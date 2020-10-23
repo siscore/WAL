@@ -70,7 +70,10 @@ namespace WAL.UI.Controls
                 {
                     case PanelTypes.Text:
                         name = $"col{index}";
-                        panel = this.Controls.Find(name, false).Where(x => x.Name.Equals(name)).First();
+                        panel = this.Controls.Find(name, false).Where(x => x.Name.Equals(name)).FirstOrDefault();
+
+                        if (panel == null)
+                            continue;
 
                         panel.Controls.Add(new Label
                         {
@@ -88,7 +91,11 @@ namespace WAL.UI.Controls
                         break;
                     case PanelTypes.Image:
                         name = $"col{index}";
-                        panel = this.Controls.Find(name, false).Where(x => x.Name.Equals(name)).First();
+                        panel = this.Controls.Find(name, false).Where(x => x.Name.Equals(name)).FirstOrDefault();
+
+                        if (panel == null)
+                            continue;
+
                         panel.BackColor = Color.White;
                         panel.Controls.Add(new PictureBox
                         {
@@ -132,40 +139,40 @@ namespace WAL.UI.Controls
 
         public void ResizeRow(object sender, EventArgs e)
         {
-            var prevPanel = (Control)null;
-            var index = 0;
+            //var prevPanel = (Control)null;
+            //var index = 0;
 
-            foreach (var col in Headers)
-            {
-                var name = $"col{index}";
-                var panel = this.Controls.Find(name, false).Where(x => x.Name.Equals(name)).First();
+            //foreach (var col in Headers)
+            //{
+            //    var name = $"col{index}";
+            //    var panel = this.Controls.Find(name, false).Where(x => x.Name.Equals(name)).First();
 
-                if (!InvokeRequired)
-                {
-                    panel.Left = prevPanel == null ? 0 : prevPanel.Left + prevPanel.Width;
-                    panel.Width = col.IfFixedWidth
-                        ? col.WidthPesantage
-                        : (((Control)sender).Width * col.WidthPesantage) / 100;
-                    panel.Height = col.Height;
-                    Debug.WriteLine($"Top: {panel.Top} Height: {panel.Height}");
+            //    if (!InvokeRequired)
+            //    {
+            //        panel.Left = prevPanel == null ? 0 : prevPanel.Left + prevPanel.Width;
+            //        panel.Width = col.IfFixedWidth
+            //            ? col.WidthPesantage
+            //            : (((Control)sender).Width * col.WidthPesantage) / 100;
+            //        panel.Height = col.Height;
+            //        Debug.WriteLine($"Top: {panel.Top} Height: {panel.Height}");
                     
-                }
-                else
-                {
-                    Invoke(new Action(() =>
-                    {
-                        panel.Left = prevPanel == null ? 0 : prevPanel.Left + prevPanel.Width;
-                        panel.Width = col.IfFixedWidth
-                            ? col.WidthPesantage
-                            : (((Control)sender).Width * col.WidthPesantage) / 100;
-                        panel.Height = col.Height;
-                        Debug.WriteLine($"Top: {panel.Top} Height: {panel.Height}");
-                    }));
-                }
+            //    }
+            //    else
+            //    {
+            //        Invoke(new Action(() =>
+            //        {
+            //            panel.Left = prevPanel == null ? 0 : prevPanel.Left + prevPanel.Width;
+            //            panel.Width = col.IfFixedWidth
+            //                ? col.WidthPesantage
+            //                : (((Control)sender).Width * col.WidthPesantage) / 100;
+            //            panel.Height = col.Height;
+            //            Debug.WriteLine($"Top: {panel.Top} Height: {panel.Height}");
+            //        }));
+            //    }
 
-                prevPanel = panel;
-                index++;
-            }
+            //    prevPanel = panel;
+            //    index++;
+            //}
         }
     }
 }

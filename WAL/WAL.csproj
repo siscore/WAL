@@ -59,6 +59,7 @@
     <Compile Include="Models\GameFileModel.cs" />
     <Compile Include="Models\GameFileParsingRuleModel.cs" />
     <Compile Include="Models\SortableGameVersionModel.cs" />
+    <Compile Include="Service\AddonsService.cs" />
     <Compile Include="Static\Const\TwitchConstants.cs" />
     <Compile Include="Static\Enums\GameDetectionHintOption.cs" />
     <Compile Include="Static\Enums\GameDetectionHintType.cs" />

@@ -53,7 +53,7 @@ namespace WAL.UI
 
         public async void LoadData()
         {
-            Program._game =  await new TwitchApiService().GetGame(TwitchConstants.WoWGameId);
+            Program._game = await new AddonsService().LoadData(TwitchConstants.WoWGameId);
 
             this.Close();
         }
