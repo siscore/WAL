@@ -20,10 +20,8 @@ namespace WAL.UI
         public Main()
         {
             InitializeComponent();
-
-            new UI.AppLoding().ShowDialog(this);
         }
-
+        
         private void Main_Load(object sender, EventArgs e)
         {
             if (!IOHelper.CheckWoWPath(Settings.Default.WoWRetailPath))
@@ -32,11 +30,12 @@ namespace WAL.UI
             }
             else
             {
-                OpenChildForm(new UI.AddonsList(TwitchConstants.WoWRetail));
+                var form = OpenChildForm(new UI.AddonsList(TwitchConstants.WoWRetail)) as AddonsList;
+                form.SearchAddons(this.BackColor);
             }
         }
 
-        private void OpenChildForm(Form childForm)
+        private Form OpenChildForm(Form childForm)
         {
             if(_currentChildForm != null)
             {
@@ -52,6 +51,8 @@ namespace WAL.UI
             panelDesktop.Tag = childForm;
             childForm.BringToFront();
             childForm.Show();
+
+            return childForm;
         }
 
         private void SettingButton_Click(object sender, EventArgs e)
@@ -61,7 +62,8 @@ namespace WAL.UI
 
         private void ShowWoWRetailButton_Click(object sender, EventArgs e)
         {
-            OpenChildForm(new UI.AddonsList(TwitchConstants.WoWRetail));
+            var form = OpenChildForm(new UI.AddonsList(TwitchConstants.WoWRetail)) as AddonsList;
+            form.SearchAddons(form.BackColor);
         }
     }
 }

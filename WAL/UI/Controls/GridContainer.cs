@@ -15,7 +15,8 @@ namespace WAL.UI.Controls
 {
     public partial class GridContainer : UserControl
     {
-        public delegate void NotifyParentEventHandler(int RowId);
+        public delegate void NotifySelectRowEventHandler(int RowId);
+        public delegate void NotifyUpdateAddonEventHandler(int RowId);
 
         private readonly List<HeaderOptionsModel> HeaderOptions;
 
@@ -121,6 +122,11 @@ namespace WAL.UI.Controls
             }
         }
 
+        private void GridRowUpdateAddon_MouseClick(int RowId)
+        {
+            Debug.WriteLine($"Update Row: {RowId}");
+        }
+
         private void GridRow_MouseClick(int RowId)
         {
             foreach (GridRowItem item in this.RowPanel.Controls)
@@ -163,7 +169,8 @@ namespace WAL.UI.Controls
                     RowPanel.Controls.Add(item.GridRowItem);
                     item.GridRowItem.ResizeRow(HeaderPanel, null);
                     item.GridRowItem.ShowInfo(item.RowItemsModel.RowItems);
-                    item.GridRowItem.NotifyParentEvent += new NotifyParentEventHandler(GridRow_MouseClick);
+                    item.GridRowItem.NotifyRowSelectEvent += new NotifySelectRowEventHandler(GridRow_MouseClick);
+                    item.GridRowItem.NotifyUpdateAddonEvent += new NotifyUpdateAddonEventHandler(GridRowUpdateAddon_MouseClick);
 
                     rowIndex++;
                 });

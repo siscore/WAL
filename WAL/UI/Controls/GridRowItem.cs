@@ -11,12 +11,14 @@ using WAL.UI.Controls.Models;
 using WAL.UI.Controls.Static.Enums;
 using static WAL.UI.Controls.GridContainer;
 using System.Diagnostics;
+using WAL.Static.Enums;
 
 namespace WAL.UI.Controls
 {
     public partial class GridRowItem : UserControl
     {
-        public event NotifyParentEventHandler NotifyParentEvent;
+        public event NotifySelectRowEventHandler NotifyRowSelectEvent;
+        public event NotifyUpdateAddonEventHandler NotifyUpdateAddonEvent;
         public bool Selected { get; set; }
 
         private readonly IEnumerable<HeaderOptionsModel> Headers;
@@ -115,6 +117,48 @@ namespace WAL.UI.Controls
                         });
 
                         break;
+                    case PanelTypes.Status:
+                        if (item.AddonStatusType == AddonStatusType.UpToDate)
+                        {
+                            panel.Controls.Add(new Label
+                            {
+                                Name = name,
+                                TextAlign = item.ContentAlignment,
+                                AutoSize = false,
+                                Dock = DockStyle.Fill,
+                                Text = item.Name,
+                                Font = this.Font,
+                                Visible = true,
+                                Padding = new Padding(15, 3, 15, 3)
+                            });
+                        }
+                        else
+                        {
+                            panel.Controls.Add(new Button
+                            {
+                                Name = name,
+                                Text = item.Name,
+                                FlatStyle = FlatStyle.Flat,
+                                Font = this.Font,
+                                Size = new Size(75, 30),
+                                ForeColor = Color.FromArgb(255, 255, 255)
+                            });
+
+                            var button = (Button)panel.Controls[0];
+                            button.FlatAppearance.BorderColor = Color.FromArgb(64, 176, 250);
+                            button.FlatAppearance.BorderSize = 2;
+                            button.FlatAppearance.MouseDownBackColor = Color.FromArgb(33, 99, 154);
+                            button.FlatAppearance.MouseOverBackColor = Color.FromArgb(44, 124, 193);
+
+                            button.Left = (panel.Width - button.Width) / 2;
+                            button.Top = (panel.Height - button.Height) / 2;
+
+                            //button.MouseClick += new MouseEventHandler(UpdateButtonClick);
+                            button.Click += new EventHandler(this.UpdateButtonClick);
+                            panel.MouseClick += new MouseEventHandler(RowMouseClick);
+                        }
+
+                        break;
                     default:
                         break;
                 }
@@ -123,6 +167,10 @@ namespace WAL.UI.Controls
 
                 index++;
             }
+        }
+        private void UpdateButtonClick(object sender, EventArgs e)
+        {
+            NotifyUpdateAddonEvent?.Invoke(this.Id);
         }
 
         private void RowMouseClick(object sender, MouseEventArgs e)
@@ -133,7 +181,7 @@ namespace WAL.UI.Controls
         private void MainClick(object sender, MouseEventArgs e)
         {
             this.Selected = !this.Selected;
-            NotifyParentEvent?.Invoke(this.Id);
+            NotifyRowSelectEvent?.Invoke(this.Id);
         }
 
         public void OnSelected(int RowId)

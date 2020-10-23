@@ -9,6 +9,7 @@ namespace WAL.UI.Controls.Static.Enums
     public enum PanelTypes
     {
         Text = 0,
-        Image = 1
+        Image = 1,
+        Status = 2
     }
 }

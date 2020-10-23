@@ -8,26 +8,28 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WAL.Helpers;
+using WAL.Models;
 using WAL.Service;
 using WAL.Static.Const;
+using WAL.UI.Controls.Models;
 
 namespace WAL.UI
 {
     public partial class AppLoding : Form
     {
         private readonly Bitmap _animatedImage;
-        //private readonly Bitmap _animatedImage = new Bitmap(@"D:\Sources\Bitbucket\WAL\WAL\icons\loading-14.gif");
         private bool _currentlyAnimating = false;
 
-        public AppLoding()
+        public AppLoding(Color backColor)
         {
             InitializeComponent();
+
+            if (backColor != null)
+                this.BackColor = backColor;
 
             _animatedImage = new Bitmap(IOHelper.WriteTempFile(Properties.Resources.loading_14));
 
             this.SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.DoubleBuffer, true);
-
-            LoadData();
         }
 
         private void AnimateImage()
@@ -51,11 +53,18 @@ namespace WAL.UI
             e.Graphics.DrawImage(_animatedImage, new Point(0, -100));
         }
 
-        public async void LoadData()
+        public async Task<GameModel> LoadGameInfo()
         {
-            Program._game = await new AddonsService().LoadData(TwitchConstants.WoWGameId);
+            var result = await new AddonsService().LoadData(TwitchConstants.WoWGameId);
 
-            this.Close();
+            return result;
+        }
+
+        public async Task<List<RowItemsModel>> LoadAddonsInfo(string addonType, GameModel game)
+        {
+            var result = await new AddonsService().SearchSupportedInstalledAddons(addonType, game);
+
+            return result;
         }
     }
 }
