@@ -82,8 +82,6 @@ namespace WAL.UI
 
             Addons = await new TwitchApiService().GetAddonsByFingerprint(fingerprints);
 
-            //AddonsListGrid.Rows.Clear();
-
             if (Addons != null && Addons.ExactMatches.Count != 0)
             {
                 var addonsServerInfo = await new TwitchApiService().GetAddonsInfo(Addons.ExactMatches.Select(x => x.Id.ToString()).ToList());
@@ -92,54 +90,84 @@ namespace WAL.UI
 
                 gridContainer1.Clear();
 
-                var rows = Addons.ExactMatches.Select((x, index) => new RowItemsModel
+                var rowsModel = new List<RowItemsModel>();
+                Addons.ExactMatches.ForEach(addon => 
                 {
-                    Id = index,
-                    RowItems = new List<RowItemModel>
+                    var addonModel = addonsServerInfo.Where(m => m.Id == addon.Id).First();
+
+                    var model = new RowItemsModel
                     {
-                        new RowItemModel
-                        {
-                            Name = addonsServerInfo.Where(m => m.Id == x.Id).First().Categories.First().AvatarUrl,
-                            Bitmap = CategoryAvatars.Where(a => a.Id == addonsServerInfo.Where(m => m.Id == x.Id).First().Categories.First().AvatarId).First().Bitmap,
-                            PanelType = PanelTypes.Image,
-                        },
-                        new RowItemModel
-                        {
-                            Name = addonsServerInfo.Where(m => m.Id == x.Id).First().Name +
+                        Id = rowsModel.Count()
+                    };
+
+                    var imageModel = new RowItemModel
+                    {
+                        Name = addonModel.Categories.First().AvatarUrl,
+                        Bitmap = CategoryAvatars.Where(a => a.Id == addonModel.Categories.First().AvatarId).First().Bitmap,
+                        PanelType = PanelTypes.Image,
+                    };
+
+                    var nameModel = new RowItemModel
+                    {
+                        Name = addonModel.Name +
                                    Environment.NewLine +
-                                   x.File.FileName,
-                            ContentAlignment = ContentAlignment.TopLeft
-                        },
-                        new RowItemModel
-                        {
-                            Name = "Unknown",
-                            ContentAlignment=ContentAlignment.MiddleCenter
-                        },
-                        new RowItemModel
-                        {
-                            Name = addonsServerInfo.Where(m => m.Id == x.Id).First().LatestFiles
+                                   addon.File.FileName,
+                        ContentAlignment = ContentAlignment.TopLeft
+                    };
+
+                    var lastfileModel = new RowItemModel
+                    {
+                    Name = addonModel.LatestFiles
+                                        .Where(l => l.FileStatus == ProjectFileStatus.Approved)
                                         .Where(l => l.ReleaseType == ProjectFileReleaseType.Release)
                                         .Where(l => l.GameVersionFlavor.Equals(PageType))
+                                        .Where(l => !l.IsAlternate)
                                         .OrderBy(o => o.FileDate)
-                                        .Last().FileName
-                        },
-                        new RowItemModel
-                        {
-                            Name = addonsServerInfo.Where(m => m.Id == x.Id).First().LatestFiles
+                                        .Last().FileName,
+                    };
+
+                    var versionModel = new RowItemModel
+                    {
+                        Name = addonModel.LatestFiles
                                         .Where(l => l.ReleaseType == ProjectFileReleaseType.Release)
                                         .Where(l => l.GameVersionFlavor.Equals(PageType))
                                         .OrderBy(o => o.FileDate)
                                         .Last().GameVersion.FirstOrDefault() ?? string.Empty,
-                            ContentAlignment = ContentAlignment.MiddleCenter
-                        },
-                        new RowItemModel
-                        {
-                            Name = addonsServerInfo.Where(m => m.Id == x.Id).First().Authors.First().Name,
-                            ContentAlignment = ContentAlignment.MiddleCenter
-                        }
-                    }
-                }).ToList();
-                gridContainer1.AddRange(rows);
+                        ContentAlignment = ContentAlignment.MiddleCenter
+                    };
+
+                    var authorModel = new RowItemModel
+                    {
+                        Name = addonModel.Authors.First().Name,
+                        ContentAlignment = ContentAlignment.MiddleCenter
+                    };
+
+                    var status = addon.File.FileName == lastfileModel.Name
+                            ? "Up to date"
+                            : "Update";
+
+                    var statusModel = new RowItemModel
+                    {
+                        Name = status,
+                        ContentAlignment = ContentAlignment.MiddleCenter
+                    };
+
+                    model.PriorityOrder = status == "Update";
+
+                    model.RowItems = new List<RowItemModel>
+                    {
+                        imageModel,
+                        nameModel,
+                        statusModel,
+                        lastfileModel,
+                        versionModel,
+                        authorModel
+                    };
+
+                    rowsModel.Add(model);
+                });
+
+                gridContainer1.AddRange(rowsModel);
             }
         }
 

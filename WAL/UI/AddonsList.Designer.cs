@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AddonsList));
             this.panel1 = new System.Windows.Forms.Panel();
             this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
@@ -45,7 +44,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1250, 60);
+            this.panel1.Size = new System.Drawing.Size(1217, 60);
             this.panel1.TabIndex = 0;
             // 
             // button3
@@ -91,7 +90,7 @@
             this.gridContainer1.Location = new System.Drawing.Point(13, 70);
             this.gridContainer1.Margin = new System.Windows.Forms.Padding(4);
             this.gridContainer1.Name = "gridContainer1";
-            this.gridContainer1.Size = new System.Drawing.Size(1224, 635);
+            this.gridContainer1.Size = new System.Drawing.Size(1191, 507);
             this.gridContainer1.TabIndex = 2;
             // 
             // AddonsList
@@ -99,7 +98,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(29)))), ((int)(((byte)(36)))));
-            this.ClientSize = new System.Drawing.Size(1250, 714);
+            this.ClientSize = new System.Drawing.Size(1217, 586);
             this.Controls.Add(this.gridContainer1);
             this.Controls.Add(this.panel1);
             this.Font = new System.Drawing.Font("Consolas", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));

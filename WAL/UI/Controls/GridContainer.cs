@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WAL.UI.Controls.Models;
+using System.Diagnostics;
+using WAL.UI.Controls.Helpers;
 
 namespace WAL.UI.Controls
 {
@@ -15,33 +17,23 @@ namespace WAL.UI.Controls
     {
         public delegate void NotifyParentEventHandler(int RowId);
 
-        public class HeaderOptionsModel
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public int Height { get; set; }
-            public bool IfFixedWidth { get; set; }
-            public int WidthPesantage { get; set; }
-            public Control Control { get; set; }
-        }
-
         private readonly List<HeaderOptionsModel> HeaderOptions;
 
-        private List<GridRowItem> RowItems { get; set; }
+        private List<GridRowItemModel> RowItems { get; set; }
 
         public GridContainer()
         {
             InitializeComponent();
 
-            RowItems = new List<GridRowItem>();
+            RowItems = new List<GridRowItemModel>();
             HeaderOptions = new List<HeaderOptionsModel>
             {
-                new HeaderOptionsModel{ Id = 0, Name = "", Height = 50, WidthPesantage = 50, IfFixedWidth = true }
-                //new HeaderOptionsModel{ Id = 1, Name = "Addon", Height = 50, WidthPesantage = 27 },
-                //new HeaderOptionsModel{ Id = 2, Name = "Status", Height = 50, WidthPesantage = 15 },
-                //new HeaderOptionsModel{ Id = 3, Name = "Last Version", Height = 50, WidthPesantage = 25 },
-                //new HeaderOptionsModel{ Id = 4, Name = "Game Version", Height = 50, WidthPesantage = 15 },
-                //new HeaderOptionsModel{ Id = 5, Name = "Author", Height = 50, WidthPesantage = 16 }
+                new HeaderOptionsModel{ Id = 0, Name = "", Height = 50, WidthPesantage = 50, IfFixedWidth = true },
+                new HeaderOptionsModel{ Id = 1, Name = "Addon", Height = 50, WidthPesantage = 27 },
+                new HeaderOptionsModel{ Id = 2, Name = "Status", Height = 50, WidthPesantage = 15 },
+                new HeaderOptionsModel{ Id = 3, Name = "Last Version", Height = 50, WidthPesantage = 25 },
+                new HeaderOptionsModel{ Id = 4, Name = "Game Version", Height = 50, WidthPesantage = 15 },
+                new HeaderOptionsModel{ Id = 5, Name = "Author", Height = 50, WidthPesantage = 16 }
             };
 
             var prevHeader = (Control)null;
@@ -50,8 +42,6 @@ namespace WAL.UI.Controls
             {
                 var parent = this.HeaderPanel;
                 var name = $"panel{header.Id}";
-
-                //parent.Height = _headerOptions.First().Height;
 
                 parent.Controls.Add(new Panel
                 {
@@ -62,7 +52,6 @@ namespace WAL.UI.Controls
                 });
 
                 var panel = this.HeaderPanel.Controls.Find(name, false).Where(x => x.Name.Equals(name)).First();
-                panel.BringToFront();
 
                 var labelName = $"Caption{header.Id}";
 
@@ -77,10 +66,32 @@ namespace WAL.UI.Controls
                     Visible = true,          
                 });
 
+                panel.Controls[0].MouseClick += new MouseEventHandler(Header_MouseClisk);
+
                 header.Control = panel;
                 prevHeader = panel;
 
             }
+        }
+
+        private void Header_MouseClisk(object sender, MouseEventArgs e)
+        {
+            var header = HeaderOptions.First(x => ((Label)sender).Parent.Name.EndsWith(x.Id.ToString()));
+
+            if (header.Sortable)
+                return;
+
+            HeaderOptions.ForEach(x => 
+            {
+                x.Sortable = false;
+                x.Control.Controls[0].ForeColor = Color.White;
+            });
+
+            
+            header.Sortable = true;
+            header.Control.Controls[0].ForeColor = Color.FromArgb(64, 176,250);
+
+            Sort();
         }
 
         private void HeaderPanel_Resize(object sender, EventArgs e)
@@ -104,59 +115,111 @@ namespace WAL.UI.Controls
 
         private void RowPanelResize(object sender, EventArgs e)
         {
-            foreach (var item in RowItems)
+            foreach (var item in RowItems.Where(x => x.GridRowItem != null))
             {
-                item.ResizeRow(HeaderPanel, e);
+                item.GridRowItem.ResizeRow(HeaderPanel, e);
             }
         }
 
         private void GridRow_MouseClick(int RowId)
         {
-            foreach(Control item in this.RowPanel.Controls)
+            foreach (GridRowItem item in this.RowPanel.Controls)
             {
-                ((GridRowItem)item).OnSelected(RowId);
+                item.OnSelected(RowId);
             }
         }
 
-        public GridRowItem Add(RowItemsModel item)
+        private void Sort()
         {
-            var name = $"row{item.Id}";
-            this.RowPanel.Controls.Add(new GridRowItem(item.Id, HeaderOptions) { Name = name });
-            var rowItem = this.RowPanel.Controls.Find(name, false).Where(x => x.Name.Equals(name)).First();
+            using (var s = new SuspendDrawingUpdate(this))
+            {
+                var sortRow = HeaderOptions.FirstOrDefault(x => x.Sortable);
 
-            //rowItem.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
-            rowItem.Dock = DockStyle.Top;
-            //rowItem.Top = (RowItems.Count) * HeaderOptions.First().Height;
-            //rowItem.Left = 0;
-            //rowItem.Size = new Size(this.RowPanel.Width, HeaderOptions.First().Height);
-            rowItem.Font = RowPanel.Font;
+                RowItems = sortRow != null
+                    ? RowItems
+                        .OrderBy(x => !x.RowItemsModel.PriorityOrder)
+                        .ThenBy(x => x.RowItemsModel.RowItems[sortRow.Id].Name).ToList()
+                    : RowItems
+                        .OrderBy(x => !x.RowItemsModel.PriorityOrder).ToList();
 
-            //((GridRowItem)rowItem).ResizeRow(this.HeaderPanel, null);
+                Clear(true);
 
-            RowItems.Add(((GridRowItem)rowItem));
-            ((GridRowItem)rowItem).ShowInfo(item.RowItems);
+                var rowIndex = 0;
+                RowItems.ForEach(item =>
+                {
+                    var name = $"row{item.RowItemsModel.Id}";
 
-            ((GridRowItem)rowItem).NotifyParentEvent += new NotifyParentEventHandler(GridRow_MouseClick);
+                    item.GridRowItem = new GridRowItem(item.RowItemsModel.Id, HeaderOptions)
+                    {
+                        Name = name,
+                        Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right,
+                        Padding = new Padding(0),
+                        Font = RowPanel.Font,
+                        Top = (rowIndex) * HeaderOptions.First().Height,
+                        Left = 0,
+                        Size = new Size(this.RowPanel.Width, HeaderOptions.First().Height)
+                    };
+
+                    RowPanel.Controls.Add(item.GridRowItem);
+                    item.GridRowItem.ResizeRow(HeaderPanel, null);
+                    item.GridRowItem.ShowInfo(item.RowItemsModel.RowItems);
+                    item.GridRowItem.NotifyParentEvent += new NotifyParentEventHandler(GridRow_MouseClick);
+
+                    rowIndex++;
+                });
+            }
+
+            this.Refresh();
+        }
+
+        private void Clear(bool OnlyVisual)
+        {
+            foreach(Control item in RowPanel.Controls)
+            {
+                item.Dispose();
+            }
+            RowPanel.Controls.Clear();
+            if (!OnlyVisual)
+                RowItems.Clear();
+        }
+
+        private GridRowItemModel AddMethod(RowItemsModel item)
+        {
+            RowItems.Add(new GridRowItemModel
+            {
+                GridRowItem = null,
+                RowItemsModel = item
+            });
 
             return RowItems.Last();
         }
 
-        public IEnumerable<GridRowItem> AddRange(IEnumerable<RowItemsModel> items)
+        public GridRowItemModel Add(RowItemsModel item)
         {
-            var result = new List<GridRowItem>();
-            foreach(var item in items)
+            var result = AddMethod(item);
+            Sort();
+
+            return result;
+        }
+
+        public IEnumerable<GridRowItemModel> AddRange(IEnumerable<RowItemsModel> items)
+        {
+            var result = new List<GridRowItemModel>();
+
+            foreach (var item in items)
             {
-                var newItem = Add(item);
+                var newItem = AddMethod(item);
                 result.Add(newItem);
             }
+
+            Sort();
 
             return result;
         }
 
         public void Clear()
         {
-            RowPanel.Controls.Clear();
-            RowItems.Clear();
+            Clear(false);
         }
     }
 }
