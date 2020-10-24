@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 using WAL.UI.Controls.Models;
 using WAL.UI.Controls.Static.Enums;
 using WAL.Static.Const;
+using System.Threading;
 
 namespace WAL.UI
 {
@@ -33,11 +34,15 @@ namespace WAL.UI
 
         public async void SearchAddons(Color backColor)
         {
-            var preloader = new AppLoding(backColor);
-            preloader.Show(this);
+            var _preloader = new Thread(() =>
+            {
+                Application.Run(new AppLoding(backColor));
+            });
+            _preloader.SetApartmentState(ApartmentState.STA);
+            _preloader.Start();
 
-            var game = await preloader.LoadGameInfo();
-            var addons = await preloader.LoadAddonsInfo(PageType, game);
+            var game = await LoadGameInfo();
+            var addons = await LoadAddonsInfo(PageType, game);
 
             if (addons != null)
             {
@@ -45,12 +50,26 @@ namespace WAL.UI
                 gridContainer1.AddRange(addons);
             }
 
-            preloader.Close();
+            _preloader.Abort();
         }
 
         private void Refresh_Click(object sender, EventArgs e)
         {
             SearchAddons(Color.FromArgb(31, 31, 35));
+        }
+
+        private async Task<GameModel> LoadGameInfo()
+        {
+            var result = await new AddonsService().LoadData(TwitchConstants.WoWGameId);
+
+            return result;
+        }
+
+        private async Task<List<RowItemsModel>> LoadAddonsInfo(string addonType, GameModel game)
+        {
+            var result = await new AddonsService().SearchSupportedInstalledAddons(addonType, game);
+
+            return result;
         }
     }
 }

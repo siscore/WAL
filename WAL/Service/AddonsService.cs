@@ -24,21 +24,21 @@ namespace WAL.Service
             var fingerprints = new List<string>();
             var searchFolders = IOHelper.GetAddonsDirectories(addonType.Equals(TwitchConstants.WoWRetail) ? WoWVersion.Retail : WoWVersion.Classic);
 
-            foreach (var addonFolder in searchFolders)
+            var tasks = searchFolders.Select(async item => 
             {
                 var matchingFiles = new List<string>();
 
-                var fileInfoList = addonFolder.GetFileSystemInfos()
+                var fileInfoList = item.GetFileSystemInfos()
                     .Where(x => x.Extension.Equals(".toc"))
                     .Select(x => x.FullName).ToList();
 
-                matchingFiles.AddRange(addonFolder.GetFileSystemInfos()
+                matchingFiles.AddRange(item.GetFileSystemInfos()
                     .Where(x => x.Extension.Equals(".xml") && x.Name.ToLowerInvariant().Contains("bindings."))
                     .Select(x => x.FullName).ToList());
 
                 foreach (string path in fileInfoList)
                 {
-                    ProcessIncludeFile(matchingFiles, new FileInfo(path), game);
+                    matchingFiles = await ProcessIncludeFile(matchingFiles, new FileInfo(path), game);
                 }
 
                 matchingFiles.Sort();
@@ -60,7 +60,9 @@ namespace WAL.Service
                 var bytes = Encoding.ASCII.GetBytes(empty);
                 var fingerprint = (long)MurmurHash2Helper.ComputeHash(bytes, false);
                 fingerprints.Add(fingerprint.ToString());
-            }
+            });
+
+            await Task.WhenAll(tasks);
 
             var addons = await new TwitchApiService().GetAddonsByFingerprint(fingerprints);
 
@@ -87,11 +89,12 @@ namespace WAL.Service
                         PanelType = PanelTypes.Image,
                     };
 
+                    var currentFileName = addon.File.FileName;
                     var nameModel = new RowItemModel
                     {
                         Name = addonModel.Name +
                                    Environment.NewLine +
-                                   addon.File.FileName,
+                                   currentFileName,
                         ContentAlignment = ContentAlignment.TopLeft
                     };
 
@@ -122,7 +125,7 @@ namespace WAL.Service
                         ContentAlignment = ContentAlignment.MiddleCenter
                     };
 
-                    var status = addon.File.FileName == lastfileModel.Name
+                    var status = currentFileName == lastfileModel.Name
                             ? AddonStatusType.UpToDate
                             : AddonStatusType.Update;
 
@@ -154,27 +157,28 @@ namespace WAL.Service
             return null;
         }
 
-        private void ProcessIncludeFile(List<string> matchingFileList, FileInfo pIncludeFile, GameModel game)
+        private async Task<List<string>> ProcessIncludeFile(List<string> matchingFileList, FileInfo pIncludeFile, GameModel game)
         {
             if (!pIncludeFile.Exists || matchingFileList.Contains(pIncludeFile.FullName.ToLowerInvariant()))
-                return;
+                return matchingFileList;
 
             matchingFileList.Add(pIncludeFile.FullName.ToLowerInvariant());
 
             if (game.FileParsingRules.Count == 0)
-                return;
+                return matchingFileList;
 
             var input = (string)null;
             using (StreamReader streamReader = new StreamReader(pIncludeFile.FullName))
             {
-                input = streamReader.ReadToEnd();
+                input = await streamReader.ReadToEndAsync();
                 streamReader.Close();
             }
 
             var gameFileParsingRule = game.FileParsingRules.FirstOrDefault(p => p.FileExtension == pIncludeFile.Extension.ToLowerInvariant());
 
             if (gameFileParsingRule == null)
-                return;
+                return matchingFileList; 
+
             if (gameFileParsingRule.CommentStripRegex != null)
                 input = gameFileParsingRule.CommentStripRegex.Replace(input, string.Empty);
 
@@ -193,9 +197,9 @@ namespace WAL.Service
                 }
                 catch { break; }
 
-                ProcessIncludeFile(matchingFileList, new FileInfo(fileName), game);
+                matchingFileList = await ProcessIncludeFile(matchingFileList, new FileInfo(fileName), game);
             }
-
+            return matchingFileList;
         }
 
         private async Task<List<CategoryAvatar>> LoadCategoryAvatars(List<CategoryModel> categoryModels)

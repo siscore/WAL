@@ -52,19 +52,5 @@ namespace WAL.UI
             ImageAnimator.UpdateFrames();
             e.Graphics.DrawImage(_animatedImage, new Point(0, -100));
         }
-
-        public async Task<GameModel> LoadGameInfo()
-        {
-            var result = await new AddonsService().LoadData(TwitchConstants.WoWGameId);
-
-            return result;
-        }
-
-        public async Task<List<RowItemsModel>> LoadAddonsInfo(string addonType, GameModel game)
-        {
-            var result = await new AddonsService().SearchSupportedInstalledAddons(addonType, game);
-
-            return result;
-        }
     }
 }

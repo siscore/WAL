@@ -9,7 +9,6 @@ namespace WAL
 {
     static class Program
     {
-        public static GameModel _game;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>

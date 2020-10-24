@@ -52,6 +52,7 @@
     <Compile Include="Helpers\EnumHelper.cs" />
     <Compile Include="Models\AddonFileDependencyModel.cs" />
     <Compile Include="Models\AddonFileModuleModel.cs" />
+    <Compile Include="Models\AddonListModel.cs" />
     <Compile Include="Models\CategoryAvatar.cs" />
     <Compile Include="Models\CategorySectionModel.cs" />
     <Compile Include="Models\FingerprintMatchModel.cs" />
