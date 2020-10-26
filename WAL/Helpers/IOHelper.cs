@@ -63,5 +63,39 @@ namespace WAL.Helpers
                 return path.IndexOfAny(Path.GetInvalidPathChars()) >= 0;
             return false;
         }
+
+        public static void MarkAsBackup(List<string> foldesToDelete)
+        {
+            foldesToDelete.ForEach(folder => 
+            {
+                var directory = new DirectoryInfo(folder);
+                var newDirectory = Path.Combine(directory.Parent.FullName, $"_{directory.Name}");
+                directory.MoveTo(newDirectory);
+            });
+        }
+
+        public static void MarkFromBackup(List<string> foldesToDelete)
+        {
+            foldesToDelete.ForEach(folder =>
+            {
+                var directory = new DirectoryInfo(folder);
+                var backupDirectory = new DirectoryInfo(Path.Combine(directory.Parent.FullName, $"_{directory.Name}"));
+
+                if (backupDirectory.Exists)
+                    backupDirectory.MoveTo(directory.FullName);
+            });
+        }
+
+        public static void DeleteDirectory(List<string> foldersToDelete)
+        {
+            foldersToDelete.ForEach(folder => 
+            {
+                var di = new DirectoryInfo(folder);
+                var bdi = new DirectoryInfo(Path.Combine(di.Parent.FullName, $"_{di.Name}"));
+                bdi.GetDirectories().ToList().ForEach(d => d.Delete(true));
+                bdi.GetFiles().ToList().ForEach(f => f.Delete());
+                bdi.Delete();
+            });
+        }
     }
 }

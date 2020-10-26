@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using WAL.UI.Controls.Models;
 using System.Diagnostics;
 using WAL.UI.Controls.Helpers;
+using static WAL.UI.AddonsList;
 
 namespace WAL.UI.Controls
 {
@@ -17,6 +18,8 @@ namespace WAL.UI.Controls
     {
         public delegate void NotifySelectRowEventHandler(int RowId);
         public delegate void NotifyUpdateAddonEventHandler(int RowId);
+
+        public Action<int> OnUpdateAddonEvent;
 
         private readonly List<HeaderOptionsModel> HeaderOptions;
 
@@ -125,6 +128,7 @@ namespace WAL.UI.Controls
         private void GridRowUpdateAddon_MouseClick(int RowId)
         {
             Debug.WriteLine($"Update Row: {RowId}");
+            OnUpdateAddonEvent?.Invoke(RowId);
         }
 
         private void GridRow_MouseClick(int RowId)
@@ -227,6 +231,35 @@ namespace WAL.UI.Controls
         public void Clear()
         {
             Clear(false);
+        }
+
+        public RowItemsModel GetItem(int RowId)
+        {
+            var result = RowItems
+                .Where(x => x.RowItemsModel.Id == RowId)
+                .Select(x => x.RowItemsModel).FirstOrDefault();
+
+            return result;
+        }
+
+        public void UpdateRow(int RowId, RowItemsModel row)
+        {
+            var result = RowItems
+                .Where(x => x.RowItemsModel.Id == RowId)
+                .FirstOrDefault();
+
+            var index = RowItems.IndexOf(result);
+
+            RowItems[index].RowItemsModel = row;
+            RowItems[index].GridRowItem.UpdateData(row.RowItems);
+
+            if (!InvokeRequired)
+                RowItems[index].GridRowItem.Refresh();
+            else
+                Invoke(new Action(() => 
+                {
+                    RowItems[index].GridRowItem.Refresh();
+                }));
         }
     }
 }

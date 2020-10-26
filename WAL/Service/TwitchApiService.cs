@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -98,6 +99,34 @@ namespace WAL.Service
                     }
 
                     return null;
+                }
+            }
+        }
+
+        public async Task<bool> DownloadAddon(Uri downloadUrl, string fileName)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.GetAsync(downloadUrl))
+                {
+                    if (response != null && response.StatusCode == HttpStatusCode.OK)
+                    {
+                        using (var stream = await response.Content.ReadAsStreamAsync())
+                        {
+                            using (var memStream = new MemoryStream())
+                            {
+                                await stream.CopyToAsync(memStream);
+                                memStream.Position = 0;
+                                using (FileStream file = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write))
+                                {
+                                    memStream.WriteTo(file);
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+
+                    return false;
                 }
             }
         }

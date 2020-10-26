@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using WAL.UI.Controls.Models;
 using WAL.UI.Controls.Static.Enums;
@@ -61,6 +58,113 @@ namespace WAL.UI.Controls
                 var panel = this.Controls.Find(name, false).Where(x => x.Name.Equals(name)).First();
 
                 prevPanel = panel;
+                index++;
+            }
+        }
+
+        public void UpdateData(IEnumerable<RowItemModel> items)
+        {
+            var index = 0;
+            var name = string.Empty;
+            var panel = (Control)null;
+
+            foreach (var item in items)
+            {
+                name = $"col{index}";
+                panel = this.Controls.Find(name, false).Where(x => x.Name.Equals(name)).FirstOrDefault();
+
+                if (panel == null)
+                    continue;
+
+                switch (item.PanelType)
+                {
+                    case PanelTypes.Text:
+                        ((Label)panel.Controls[0]).Text = item.Name;
+
+                        break;
+                    case PanelTypes.Image:
+                        ((PictureBox)panel.Controls[0]).Image = item.Bitmap;
+
+                        break;
+                    case PanelTypes.Status:
+                        if (panel.Controls.Count != 0)
+                        {
+                            foreach (Control control in panel.Controls)
+                            {
+                                if (control.InvokeRequired)
+                                {
+                                    Invoke(new Action(() =>
+                                    {
+                                        control.Dispose();
+                                    }));
+                                }
+                                else
+                                {
+                                    control.Dispose();
+                                }
+                            }
+                        }
+
+                        if (item.AddonStatusType == AddonStatusType.UpToDate)
+                        {
+                            var label = new Label
+                            {
+                                Name = name,
+                                TextAlign = item.ContentAlignment,
+                                AutoSize = false,
+                                Dock = DockStyle.Fill,
+                                Text = item.Name,
+                                Font = this.Font,
+                                Visible = true,
+                                Padding = new Padding(15, 3, 15, 3)
+                            };
+
+                            if (!InvokeRequired)
+                                panel.Controls.Add(label);
+                            else
+                                Invoke(new Action(() => 
+                                {
+                                    panel.Controls.Add(label);
+                                }));
+                        }
+                        else
+                        {
+                            var newButton = new Button
+                            {
+                                Name = name,
+                                Text = item.Name,
+                                FlatStyle = FlatStyle.Flat,
+                                Font = this.Font,
+                                Size = new Size(75, 30),
+                                ForeColor = Color.FromArgb(255, 255, 255)
+                            };
+
+                            if (!InvokeRequired)
+                                panel.Controls.Add(newButton);
+                            else
+                                Invoke(new Action(() =>
+                                {
+                                    panel.Controls.Add(newButton);
+                                }));
+
+                            var button = (Button)panel.Controls[0];
+                            button.FlatAppearance.BorderColor = Color.FromArgb(64, 176, 250);
+                            button.FlatAppearance.BorderSize = 2;
+                            button.FlatAppearance.MouseDownBackColor = Color.FromArgb(33, 99, 154);
+                            button.FlatAppearance.MouseOverBackColor = Color.FromArgb(44, 124, 193);
+
+                            button.Left = (panel.Width - button.Width) / 2;
+                            button.Top = (panel.Height - button.Height) / 2;
+
+                            button.Click += new EventHandler(this.UpdateButtonClick);
+                            panel.MouseClick += new MouseEventHandler(RowMouseClick);
+                        }
+
+                        break;
+                    default:
+                        break;
+                }
+
                 index++;
             }
         }

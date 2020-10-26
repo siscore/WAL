@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -19,7 +20,7 @@ namespace WAL.Service
     {
         public async Task<GameModel> LoadData(int GameId) => await new TwitchApiService().GetGame(GameId);
 
-        public async Task<List<RowItemsModel>> SearchSupportedInstalledAddons(string addonType, GameModel game)
+        public async Task<List<AddonListModel>> SearchSupportedInstalledAddons(string addonType, GameModel game)
         {
             var fingerprints = new List<string>();
             var searchFolders = IOHelper.GetAddonsDirectories(addonType.Equals(TwitchConstants.WoWRetail) ? WoWVersion.Retail : WoWVersion.Classic);
@@ -70,89 +71,60 @@ namespace WAL.Service
             {
                 var addonsServerInfo = await new TwitchApiService().GetAddonsInfo(addons.ExactMatches.Select(x => x.Id.ToString()).ToList());
 
-                var categoryAvatars = await LoadCategoryAvatars(addonsServerInfo.Select(x => x.Categories.First()).ToList());
+                var categoryAvatars = await LoadCategoryAvatars(addonsServerInfo.Select(x => x.Categories.Where(c => c.CategoryId == x.PrimaryCategoryId).First()).ToList());
 
-                var rowsModel = new List<RowItemsModel>();
+                var resultModel = new List<AddonListModel>();
                 addons.ExactMatches.ForEach(addon =>
                 {
                     var addonModel = addonsServerInfo.Where(m => m.Id == addon.Id).First();
 
-                    var model = new RowItemsModel
-                    {
-                        Id = rowsModel.Count()
-                    };
-
-                    var imageModel = new RowItemModel
-                    {
-                        Name = addonModel.Categories.First().AvatarUrl,
-                        Bitmap = categoryAvatars.Where(a => a.Id == addonModel.Categories.First().AvatarId).First().Bitmap,
-                        PanelType = PanelTypes.Image,
-                    };
-
                     var currentFileName = addon.File.FileName;
-                    var nameModel = new RowItemModel
-                    {
-                        Name = addonModel.Name +
-                                   Environment.NewLine +
-                                   currentFileName,
-                        ContentAlignment = ContentAlignment.TopLeft
-                    };
 
-                    var lastfileModel = new RowItemModel
-                    {
-                        Name = addonModel.LatestFiles
+                    var displayName = addonModel.Name + Environment.NewLine + currentFileName;
+
+                    var latestFile = addonModel.LatestFiles
                                         .Where(l => l.FileStatus == ProjectFileStatus.Approved)
                                         .Where(l => l.ReleaseType == ProjectFileReleaseType.Release)
                                         .Where(l => l.GameVersionFlavor.Equals(addonType))
                                         .Where(l => !l.IsAlternate)
                                         .OrderBy(o => o.FileDate)
-                                        .Last().FileName,
-                    };
+                                        .Last();
 
-                    var versionModel = new RowItemModel
-                    {
-                        Name = addonModel.LatestFiles
-                                        .Where(l => l.ReleaseType == ProjectFileReleaseType.Release)
-                                        .Where(l => l.GameVersionFlavor.Equals(addonType))
-                                        .OrderBy(o => o.FileDate)
-                                        .Last().GameVersion.FirstOrDefault() ?? string.Empty,
-                        ContentAlignment = ContentAlignment.MiddleCenter
-                    };
+                    var latestFileName = latestFile.FileName;
 
-                    var authorModel = new RowItemModel
-                    {
-                        Name = addonModel.Authors.First().Name,
-                        ContentAlignment = ContentAlignment.MiddleCenter
-                    };
-
-                    var status = currentFileName == lastfileModel.Name
+                    var status = currentFileName == latestFileName
                             ? AddonStatusType.UpToDate
                             : AddonStatusType.Update;
 
-                    var statusModel = new RowItemModel
+                    var avatarId = addonModel.Categories
+                                            .Where(c => c.CategoryId == addonModel.PrimaryCategoryId)
+                                            .First().AvatarId;
+
+                    var avatar = categoryAvatars
+                                    .Where(a => a.Id == avatarId)
+                                    .First().Bitmap;
+
+                    var item = new AddonListModel()
                     {
-                        Name = EnumHelper.GetEnumDescription(status),
-                        ContentAlignment = ContentAlignment.MiddleCenter,
-                        PanelType = PanelTypes.Status,
-                        AddonStatusType = status
+                        Id = addon.Id,
+                        DisplayName = displayName,
+                        FileDate = addon.File.FileDate,
+                        FileId = addon.File.Id,
+                        LatestFile = latestFile,
+                        LatestFileVersion = latestFileName,
+                        LatestFileVesionFileId = latestFile.Id,
+                        Name = addonModel.Name,
+                        Author = addonModel.Authors.First().Name,
+                        GameVersion = latestFile.GameVersion.FirstOrDefault() ?? string.Empty,
+                        AddonAvatar = avatar,
+                        StatusType = status,
+                        StatusName = EnumHelper.GetEnumDescription(status)
                     };
 
-                    model.PriorityOrder = status == AddonStatusType.Update;
-
-                    model.RowItems = new List<RowItemModel>
-                    {
-                        imageModel,
-                        nameModel,
-                        statusModel,
-                        lastfileModel,
-                        versionModel,
-                        authorModel
-                    };
-
-                    rowsModel.Add(model);
+                    resultModel.Add(item);
                 });
 
-                return rowsModel;
+                return resultModel;
             }
             return null;
         }
@@ -212,6 +184,45 @@ namespace WAL.Service
                 result.Add(new CategoryAvatar { Id = item.AvatarId, Url = item.AvatarUrl, Bitmap = bitmap });
             });
             await Task.WhenAll(tasks);
+
+            return result;
+        }
+
+        public async Task<AddonListModel> UpdateAddon(AddonListModel addon)
+        {
+            var result = addon;
+
+            var downloadUrl = new Uri(addon.LatestFile.DownloadUrl);
+
+            var wowAddonsFolder = IOHelper.GetAddonsFolder(addon.LatestFile.GameVersionFlavor == TwitchConstants.WoWRetail
+                ? WoWVersion.Retail
+                : WoWVersion.Classic);
+
+            var foldesToDelete = addon.LatestFile.Modules.Select(x => Path.Combine(wowAddonsFolder, x.Foldername)).ToList();
+
+            var addonFile = Path.GetTempFileName();
+
+            try
+            {
+                var fileZip = await new TwitchApiService().DownloadAddon(downloadUrl, addonFile);
+
+                IOHelper.MarkAsBackup(foldesToDelete);
+
+                ZipFile.ExtractToDirectory(addonFile, wowAddonsFolder);
+
+                result.DisplayName = addon.Name + Environment.NewLine + addon.LatestFile.DisplayName;
+                result.StatusType = AddonStatusType.UpToDate;
+                result.StatusName = EnumHelper.GetEnumDescription(addon.StatusType);
+            }
+            catch
+            {
+                IOHelper.MarkFromBackup(foldesToDelete);
+                return null;
+            }
+            finally
+            {
+                IOHelper.DeleteDirectory(foldesToDelete);
+            }
 
             return result;
         }
