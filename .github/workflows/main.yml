@@ -1,6 +1,8 @@
 name: WAL Build
  
-on: [push]
+on: 
+ push:
+  tags: Release
  
 jobs:
   build:
