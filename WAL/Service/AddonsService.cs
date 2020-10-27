@@ -78,7 +78,20 @@ namespace WAL.Service
                 {
                     var addonModel = addonsServerInfo.Where(m => m.Id == addon.Id).First();
 
-                    var currentFileName = addon.File.FileName;
+                    var currentFileName = string.Empty;
+                    
+                    if (addon.File.ReleaseType != ProjectFileReleaseType.Release && addon.File.ProjectStatus == ProjectStatus.Approved)
+                    {
+                        var addonModules = addon.LatestFiles
+                                            .Where(x => x.ProjectStatus == ProjectStatus.Approved)
+                                            .Where(x => x.ReleaseType == ProjectFileReleaseType.Release)
+                                            .OrderByDescending(x => x.FileDate)
+                                            .First();
+
+                        currentFileName = addonModules.FileName;
+                    }
+                    else
+                        currentFileName = addon.File.FileName;
 
                     var displayName = addonModel.Name + Environment.NewLine + currentFileName;
 
