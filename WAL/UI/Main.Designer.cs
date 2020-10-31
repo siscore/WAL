@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
             this.panelMenu = new System.Windows.Forms.Panel();
+            this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.btnWoWRetail = new System.Windows.Forms.Button();
             this.panelDesktop = new System.Windows.Forms.Panel();
@@ -39,6 +40,7 @@
             // panelMenu
             // 
             this.panelMenu.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(41)))), ((int)(((byte)(42)))), ((int)(((byte)(50)))));
+            this.panelMenu.Controls.Add(this.button2);
             this.panelMenu.Controls.Add(this.button1);
             this.panelMenu.Controls.Add(this.btnWoWRetail);
             this.panelMenu.Dock = System.Windows.Forms.DockStyle.Top;
@@ -46,6 +48,19 @@
             this.panelMenu.Name = "panelMenu";
             this.panelMenu.Size = new System.Drawing.Size(1060, 75);
             this.panelMenu.TabIndex = 0;
+            // 
+            // button2
+            // 
+            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(41)))), ((int)(((byte)(42)))), ((int)(((byte)(50)))));
+            this.button2.Image = global::WAL.Properties.Resources._48px_WoW_icon_svg;
+            this.button2.Location = new System.Drawing.Point(96, 0);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(75, 75);
+            this.button2.TabIndex = 2;
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Visible = false;
+            this.button2.Click += new System.EventHandler(this.ShowWoWClassicButton_Click);
             // 
             // button1
             // 
@@ -109,6 +124,7 @@
         private System.Windows.Forms.Button btnWoWRetail;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Panel panelDesktop;
+        private System.Windows.Forms.Button button2;
     }
 }
 

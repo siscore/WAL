@@ -10,6 +10,6 @@ namespace WAL.Static.Const
     {
         public const int WoWGameId = 1;
         public const string WoWRetail = "wow_retail";
-        public const string WoWClassic = "wow_classic";
+        public const string WoWClassic = "classic";
     }
 }

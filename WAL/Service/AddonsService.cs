@@ -71,7 +71,7 @@ namespace WAL.Service
             {
                 var addonsServerInfo = await new TwitchApiService().GetAddonsInfo(addons.ExactMatches.Select(x => x.Id.ToString()).ToList());
 
-                var categoryAvatars = await LoadCategoryAvatars(addonsServerInfo.Select(x => x.Categories.Where(c => c.CategoryId == x.PrimaryCategoryId).First()).ToList());
+                var categoryAvatars = await LoadCategoryAvatars(addonsServerInfo.Where(x => x.Categories.Count != 0).Select(x => x.Categories.Where(c => c.CategoryId == x.PrimaryCategoryId).First()).ToList());
 
                 var resultModel = new List<AddonListModel>();
                 addons.ExactMatches.ForEach(addon =>
@@ -111,11 +111,13 @@ namespace WAL.Service
 
                     var avatarId = addonModel.Categories
                                             .Where(c => c.CategoryId == addonModel.PrimaryCategoryId)
-                                            .First().AvatarId;
+                                            .FirstOrDefault()?.AvatarId;
 
-                    var avatar = categoryAvatars
+                    var avatar = avatarId.HasValue 
+                        ? categoryAvatars
                                     .Where(a => a.Id == avatarId)
-                                    .First().Bitmap;
+                                    .First().Bitmap
+                        : Properties.Resources.defaultAddonAvatar;
 
                     var item = new AddonListModel()
                     {

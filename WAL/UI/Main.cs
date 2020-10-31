@@ -65,5 +65,11 @@ namespace WAL.UI
             var form = OpenChildForm(new UI.AddonsList(TwitchConstants.WoWRetail)) as AddonsList;
             form.SearchAddons(form.BackColor);
         }
+
+        private void ShowWoWClassicButton_Click(object sender, EventArgs e)
+        {
+            var form = OpenChildForm(new UI.AddonsList(TwitchConstants.WoWClassic)) as AddonsList;
+            form.SearchAddons(form.BackColor);
+        }
     }
 }
