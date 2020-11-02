@@ -219,29 +219,31 @@ namespace WAL.Service
                 : WoWVersion.Classic);
 
             var foldesToDelete = addon.File.Modules.Select(x => Path.Combine(wowAddonsFolder, x.Foldername)).ToList();
+            var foldesBackup = addon.File.Modules.Select(x => Path.Combine(wowAddonsFolder, $"_{x.Foldername}")).ToList();
 
-            var addonFile = Path.GetTempFileName();
+
+            var zipPath = Path.GetTempFileName();
 
             try
             {
-                var fileZip = await new TwitchApiService().DownloadAddon(downloadUrl, addonFile);
+                await new TwitchApiService().DownloadAddon(downloadUrl, zipPath);
 
                 IOHelper.MarkAsBackup(foldesToDelete);
 
-                ZipFile.ExtractToDirectory(addonFile, wowAddonsFolder);
+                ZipFile.ExtractToDirectory(zipPath, wowAddonsFolder);
 
-                result.DisplayName = addon.Name + Environment.NewLine + addon.LatestFile.DisplayName;
+                result.DisplayName = addon.Name + Environment.NewLine + addon.LatestFile.FileName;
                 result.StatusType = AddonStatusType.UpToDate;
                 result.StatusName = EnumHelper.GetEnumDescription(addon.StatusType);
             }
             catch
             {
-                IOHelper.MarkFromBackup(foldesToDelete);
+                IOHelper.MarkFromBackup(foldesBackup);
                 return null;
             }
             finally
             {
-                IOHelper.DeleteDirectory(foldesToDelete);
+                IOHelper.DeleteDirectory(foldesBackup);
             }
 
             return result;

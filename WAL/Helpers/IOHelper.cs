@@ -64,9 +64,9 @@ namespace WAL.Helpers
             return false;
         }
 
-        public static void MarkAsBackup(List<string> foldesToDelete)
+        public static void MarkAsBackup(List<string> folders)
         {
-            foldesToDelete.ForEach(folder => 
+            folders.ForEach(folder => 
             {
                 var directory = new DirectoryInfo(folder);
                 var newDirectory = Path.Combine(directory.Parent.FullName, $"_{directory.Name}");
@@ -74,9 +74,9 @@ namespace WAL.Helpers
             });
         }
 
-        public static void MarkFromBackup(List<string> foldesToDelete)
+        public static void MarkFromBackup(List<string> folders)
         {
-            foldesToDelete.ForEach(folder =>
+            folders.ForEach(folder =>
             {
                 var directory = new DirectoryInfo(folder);
                 var backupDirectory = new DirectoryInfo(Path.Combine(directory.Parent.FullName, $"_{directory.Name}"));
@@ -86,15 +86,14 @@ namespace WAL.Helpers
             });
         }
 
-        public static void DeleteDirectory(List<string> foldersToDelete)
+        public static void DeleteDirectory(List<string> folders)
         {
-            foldersToDelete.ForEach(folder => 
+            folders.ForEach(folder => 
             {
                 var di = new DirectoryInfo(folder);
-                var bdi = new DirectoryInfo(Path.Combine(di.Parent.FullName, $"_{di.Name}"));
-                bdi.GetDirectories().ToList().ForEach(d => d.Delete(true));
-                bdi.GetFiles().ToList().ForEach(f => f.Delete());
-                bdi.Delete();
+                di.GetDirectories().ToList().ForEach(d => d.Delete(true));
+                di.GetFiles().ToList().ForEach(f => f.Delete());
+                di.Delete();
             });
         }
     }

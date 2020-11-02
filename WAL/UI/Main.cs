@@ -20,6 +20,8 @@ namespace WAL.UI
         public Main()
         {
             InitializeComponent();
+
+            this.Text += $" v{Application.ProductVersion}";
         }
         
         private void Main_Load(object sender, EventArgs e)
