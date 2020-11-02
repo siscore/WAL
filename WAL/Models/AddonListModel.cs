@@ -17,6 +17,7 @@ namespace WAL.Models
         public string DisplayName { get; set; }
         public DateTime FileDate { get; set; }
         public int FileId { get; set; }
+        public AddonFileModel File { get; set; }
 
         public string LatestFileVersion { get; set; }
         public int LatestFileVesionFileId { get; set; }

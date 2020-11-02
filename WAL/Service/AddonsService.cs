@@ -79,19 +79,23 @@ namespace WAL.Service
                     var addonModel = addonsServerInfo.Where(m => m.Id == addon.Id).First();
 
                     var currentFileName = string.Empty;
-                    
-                    if (addon.File.ReleaseType != ProjectFileReleaseType.Release && addon.File.ProjectStatus == ProjectStatus.Approved)
-                    {
-                        var addonModules = addon.LatestFiles
+
+                    var currentAddonFileModel = addon.LatestFiles
                                             .Where(x => x.ProjectStatus == ProjectStatus.Approved)
                                             .Where(x => x.ReleaseType == ProjectFileReleaseType.Release)
                                             .OrderByDescending(x => x.FileDate)
-                                            .First();
+                                            .FirstOrDefault();
 
-                        currentFileName = addonModules.FileName;
+                    if (addon.File.ReleaseType != ProjectFileReleaseType.Release && addon.File.ProjectStatus == ProjectStatus.Approved)
+                    {
+                        currentFileName = currentAddonFileModel.FileName;
                     }
                     else
+                    {
                         currentFileName = addon.File.FileName;
+                        currentAddonFileModel = addon.File;
+                    }
+                        
 
                     var displayName = addonModel.Name + Environment.NewLine + currentFileName;
 
@@ -125,6 +129,7 @@ namespace WAL.Service
                         DisplayName = displayName,
                         FileDate = addon.File.FileDate,
                         FileId = addon.File.Id,
+                        File = currentAddonFileModel,
                         LatestFile = latestFile,
                         LatestFileVersion = latestFileName,
                         LatestFileVesionFileId = latestFile.Id,
@@ -213,7 +218,7 @@ namespace WAL.Service
                 ? WoWVersion.Retail
                 : WoWVersion.Classic);
 
-            var foldesToDelete = addon.LatestFile.Modules.Select(x => Path.Combine(wowAddonsFolder, x.Foldername)).ToList();
+            var foldesToDelete = addon.File.Modules.Select(x => Path.Combine(wowAddonsFolder, x.Foldername)).ToList();
 
             var addonFile = Path.GetTempFileName();
 
